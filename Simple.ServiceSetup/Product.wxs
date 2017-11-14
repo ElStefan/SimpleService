@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?define Simple.Service_TargetDir=$(var.Simple.Service.TargetDir)?>
+  <?define UpgradeGuid = "{b9a26766-d805-4c70-a43a-032277ea5b42}"?>
+  <?define Manufacturer = "ElStefan"?>
+  <?define Version = "!(bind.FileVersion.Simple.Library.dll)"?>
+  <Product Id="*" Name="Simple.Service" Language="1033" Version="$(var.Version)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.UpgradeGuid)">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <Media Id="1" Cabinet="temp.cab" EmbedCab="yes" />
+
+    <Upgrade Id="$(var.UpgradeGuid)">
+      <UpgradeVersion Minimum="$(var.Version)" IncludeMinimum="no" OnlyDetect="yes" Property="NEWPRODUCTFOUND" />
+      <UpgradeVersion Minimum="$(var.Version)" IncludeMinimum="yes" OnlyDetect="yes" Property="SAMEPRODUCTFOUND" />
+      <UpgradeVersion Maximum="$(var.Version)" IncludeMaximum="no" OnlyDetect="no" Property="OLDPRODUCTFOUND" />
+    </Upgrade>
+
+    <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
+
+    <CustomAction Id="PreventReinstall" Error="This version is already installed." />
+
+    <InstallExecuteSequence>
+      <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWPRODUCTFOUND</Custom>
+      <Custom Action="PreventReinstall" After="FindRelatedProducts">SAMEPRODUCTFOUND</Custom>
+      <RemoveExistingProducts After="InstallFinalize" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWPRODUCTFOUND</Custom>
+      <Custom Action="PreventReinstall" After="FindRelatedProducts">SAMEPRODUCTFOUND</Custom>
+    </InstallUISequence>
+
+    <Feature Id="ProductFeature" Title="Simple.ServiceSetup">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+  </Product>
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="Company" Name="$(var.Manufacturer)">
+          <Directory Id="INSTALLFOLDER" Name="Simple Service" />
+        </Directory>
+      </Directory>
+    </Directory>
+  </Fragment>
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="Simple.Service.exe" Guid="acf92f33-8af9-47d2-9c9b-1044b3b8e0ba">
+        <File Id="Simple.Service.exe" Name="Simple.Service.exe" Source="$(var.Simple.Service_TargetDir)Simple.Service.exe" />
+        <ServiceInstall Id="ServiceInstaller" Type="ownProcess" Vital="yes" Name="Simple Service" DisplayName="Simple Service" Start="auto" ErrorControl="ignore" Interactive="no" />
+        <ServiceControl Id="ServiceController" Name="Simple Service" Start="install" Stop="uninstall" Remove="uninstall" />
+      </Component>
+      <Component Id="Simple.Library.dll" Guid="3b6edd98-a214-4fbb-8c67-756b3fbf55e8">
+        <File Id="Simple.Library.dll" Name="Simple.Library.dll" Source="$(var.Simple.Service_TargetDir)Simple.Library.dll" />
+      </Component>
+      <Component Id="Simple.Library.pdb" Guid="edde4d5c-b175-489b-a0f1-7a01cb49ca34">
+        <File Id="Simple.Library.pdb" Name="Simple.Library.pdb" Source="$(var.Simple.Service_TargetDir)Simple.Library.pdb" />
+      </Component>
+      <Component Id="Simple.Library.xml" Guid="8228e4eb-b348-4a8a-9187-29a50e197692">
+        <File Id="Simple.Library.xml" Name="Simple.Library.xml" Source="$(var.Simple.Service_TargetDir)Simple.Library.xml" />
+      </Component>
+      <Component Id="Simple.Service.exe.config" Guid="739ab8cd-a445-428b-b2a7-e555c5c951c8" NeverOverwrite="yes" Permanent="yes">
+        <File Id="Simple.Service.exe.config" Name="Simple.Service.exe.config" Source="$(var.Simple.Service_TargetDir)Simple.Service.exe.config" />
+      </Component>
+      <Component Id="Simple.Service.pdb" Guid="8208eaca-6008-440c-ae96-3b9dfd4d81e6">
+        <File Id="Simple.Service.pdb" Name="Simple.Service.pdb" Source="$(var.Simple.Service_TargetDir)Simple.Service.pdb" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>
